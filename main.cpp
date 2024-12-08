@@ -1,117 +1,63 @@
 #include <iostream>
 #include <vector>
 #include <map>
-#include <unordered_set>
 
 using namespace std;
 
-int sumEvents(const unordered_set<uint>& eventsId, const vector<vector<int>>& events) {
-
-    int tot = 0;
-    for(const uint& eventId : eventsId) {
-        tot += events.at(eventId).at(2);
-        cout << "sumEvents tot " << tot << " eventId " << eventId << " value " << events.at(eventId).at(2) << endl;
-    }
-    return tot;
-}
-
-void insertEvent(map<int, uint>& map, uint index, const vector<int>& event) {
-
-    for(int a=event.at(0); a <= event.at(1); a++) {
-        map[a] = index;
-        cout << "insertEvent map[" << a << "] = " << index << endl;
-    }
-}
-
-void removeEvents(map<int, uint>& map, const unordered_set<uint>& eventsId, const vector<vector<int>>& events) {
-
-    for(const uint& eventId : eventsId) {
-
-        const vector<int>& event = events.at(eventId);
-        for(int a=event.at(0); a <= event.at(1); a++) {
-
-            if(map.at(a) == eventId) {
-                map.erase(a);
-                cout << "removeEvents map[" << a << "]" << endl;
-            }
-        }
-    }
-}
-
-
 int maxTwoEvents(vector<vector<int>>& events) {
 
-    map<int, uint> analized; // Vamos utilizar um mapeamento identificando 'Times' analisados (key: Time, value: Id do Evento)
-    int tot = 0; // Vamos utilizar uma variável para identificar o valor total
-    uint preventDuplicateEventId = -1; // Vamos inicializar preventDuplicateEventId com valor inválido
+    uint tot = 0;
+    map<uint, uint> analized;
 
-    // Vamos inserir o primeiro evento
-    insertEvent(analized, 0, events.at(0));
+    for(uint first=0; first < events.size(); first++) {
 
-    // Vamos analisar os demais casos
-    for(uint i=1; i < events.size(); i++) {
+        const vector<int>& fEvent = events.at(first);
+        const int& fStart = fEvent.at(0);
+        const int& fEnd = fEvent.at(1);
+        // const int& fValue = fEvent.at(2);
 
-        // Vamos criar os facilitadores necessários
-        const vector<int>& event = events.at(i);
-        const int& start = event.at(0);
-        const int& end = event.at(1);
-        const int& value = event.at(2);
+        int oldValue = 0;
 
-        // Vamos identificar o evento corrente
-        cout << "eventId " << i << endl;
+        analized[first] = first;
 
-        // Vamos criar um vetor auxiliar com o IDs dos eventos que tem conflito
-        unordered_set<uint> conflitEvents;
+        for(uint second=first+1; second < events.size(); second++) {
 
-        // Vamos percorrer todos os eventos já analisados
-        for(const auto& pair : analized) {
+            const vector<int>& sEvent = events.at(second);
+            const int& sStart = sEvent.at(0);
+            const int& sEnd = sEvent.at(1);
+            const int& sValue = sEvent.at(2);
 
-            const int& time = pair.first;
-            const int& eventId = pair.second;
+            // Conflito do first com second
+            if((fStart >= sStart && fStart <= sEnd) || (fEnd >= sStart && fEnd <= sEnd))
+                continue;
 
-            if(time >= start && time <= end) {
+            // Conflito do second com first
+            if((sStart >= fStart && sStart <= fEnd) || (sEnd >= fStart && sEnd <= fEnd))
+                continue;
 
-                if(!conflitEvents.contains(eventId)) {
+            // Valor novo é menor que o antigo
+            if(sValue < oldValue)
+                continue;
 
-                    conflitEvents.insert(eventId);
-
-                    cout << "time " << time << " start " << start << " end " << end << endl;
-                    cout << "conflitEvents.insert(" << eventId << ")" << endl;
-                }
-            }
-        }
-
-        // Se houverem conflitos
-        if(!conflitEvents.empty()) {
-
-            // Se os eventos antigos possuem um valor menor, vamos removê-los
-            if(value > sumEvents(conflitEvents, events)) {
-
-                removeEvents(analized, conflitEvents, events);
-                insertEvent(analized, i, event);
-            }
-        }
-        else {
-
-            insertEvent(analized, i, event);
+            oldValue = sValue;
+            analized[first] = second;
         }
     }
 
-    // Vamos imprimir mapeamento obtido
-    for(auto value : analized) {
-        cout << "analized[" << value.first << "] eventId = " << value.second << " value = " << events.at(value.second).at(2) << endl;
-    }
-
-    // Vamos percorrer o mapeamento e evitar as duplicações de incrementos com o mesmo Id de evento
+    // Vamos calcular os valores obtidos
     for(auto value : analized) {
 
-        if(preventDuplicateEventId != value.second) {
+        uint result;
+        if(value.first != value.second)
+            result = events.at(value.first).at(2) + events.at(value.second).at(2);
+        else
+            result = events.at(value.first).at(2);
 
-            tot += events.at(value.second).at(2);
-            preventDuplicateEventId = value.second;
-        }
+        cout << "analized firstEvent " << value.first << " secondEvent " << value.second << " result = " << result << endl;
+
+        if(tot < result)
+            tot = result;
     }
-
     return tot;
 }
 
@@ -125,8 +71,8 @@ int main()
     //vector<vector<int>> vects = {{1,5,3},{1,5,1},{6,6,5},{1,3,7},{2,4,8},{1,10,13},{1,2,60}};
     //vector<vector<int>> vects = {{1,5,3},{1,5,1},{6,6,5},{1,3,7},{2,4,8},{1,10,13},{1,2,60},{4,9,9}};
     //vector<vector<int>> vects = {{1,5,3},{1,5,1},{6,6,5},{1,3,7},{2,4,8},{1,10,13},{1,2,60},{4,9,9},{1,10,61}};
-    vector<vector<int>> vects = {{1,5,63},{1,5,1},{6,6,5},{1,3,7},{2,4,8},{1,10,13},{1,2,60},{4,9,9},{1,10,61}};
-    //vector<vector<int>> vects = {{1,10,62},{1,5,63},{1,5,1},{6,6,5},{1,3,7},{2,4,8},{1,10,13},{1,2,60},{4,9,9},{1,10,61}};
+    //vector<vector<int>> vects = {{1,5,63},{1,5,1},{6,6,5},{1,3,7},{2,4,8},{1,10,13},{1,2,60},{4,9,9},{1,10,61}};
+    vector<vector<int>> vects = {{1,10,62},{1,5,63},{1,5,1},{6,6,5},{1,3,7},{2,4,8},{1,10,13},{1,2,60},{4,9,9},{1,10,61}};
     cout << maxTwoEvents(vects);
     cout << endl;
     return 0;
