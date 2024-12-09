@@ -26,7 +26,7 @@ int maxTwoEvents(vector<vector<int>>& events) {
 
     for(uint first=0; first < events.size(); first++) {
 
-        fEvent = &events.at(first);
+        fEvent = &events[first];
         fStart = &fEvent->at(0);
         fEnd = &fEvent->at(1);
 
@@ -35,7 +35,7 @@ int maxTwoEvents(vector<vector<int>>& events) {
         oldValue = nullptr;
         for(uint second=first+1; second < events.size(); second++) {
 
-            sEvent = &events.at(second);
+            sEvent = &events[second];
             sStart = &sEvent->at(0);
             sEnd = &sEvent->at(1);
             sValue = &sEvent->at(2);
@@ -57,9 +57,9 @@ int maxTwoEvents(vector<vector<int>>& events) {
         }
 
         if(analized[first] != first)
-            result = events.at(first).at(2) + events.at(analized[first]).at(2);
+            result = events[first][2] + events[analized[first]][2];
         else
-            result = events.at(first).at(2);
+            result = events[first][2];
 
         if(tot < result)
             tot = result;
