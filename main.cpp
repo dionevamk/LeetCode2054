@@ -1,13 +1,16 @@
 #include <iostream>
 #include <vector>
-#include <map>
+#include <unordered_map>
+
+//#include "CaseTests.h"
 
 using namespace std;
 
 int maxTwoEvents(vector<vector<int>>& events) {
 
     uint tot = 0;
-    map<uint, uint> analized;
+    uint result;
+    unordered_map<uint, uint> analized;
 
     for(uint first=0; first < events.size(); first++) {
 
@@ -16,9 +19,9 @@ int maxTwoEvents(vector<vector<int>>& events) {
         const int& fEnd = fEvent.at(1);
         // const int& fValue = fEvent.at(2);
 
-        int oldValue = 0;
-
         analized[first] = first;
+
+        int oldValue = 0;
 
         for(uint second=first+1; second < events.size(); second++) {
 
@@ -42,22 +45,16 @@ int maxTwoEvents(vector<vector<int>>& events) {
             oldValue = sValue;
             analized[first] = second;
         }
-    }
 
-    // Vamos calcular os valores obtidos
-    for(auto value : analized) {
-
-        uint result;
-        if(value.first != value.second)
-            result = events.at(value.first).at(2) + events.at(value.second).at(2);
+        if(analized[first] != first)
+            result = events.at(first).at(2) + events.at(analized[first]).at(2);
         else
-            result = events.at(value.first).at(2);
-
-        cout << "analized firstEvent " << value.first << " secondEvent " << value.second << " result = " << result << endl;
+            result = events.at(first).at(2);
 
         if(tot < result)
             tot = result;
     }
+
     return tot;
 }
 
@@ -74,6 +71,7 @@ int main()
     //vector<vector<int>> vects = {{1,5,63},{1,5,1},{6,6,5},{1,3,7},{2,4,8},{1,10,13},{1,2,60},{4,9,9},{1,10,61}};
     vector<vector<int>> vects = {{1,10,62},{1,5,63},{1,5,1},{6,6,5},{1,3,7},{2,4,8},{1,10,13},{1,2,60},{4,9,9},{1,10,61}};
     cout << maxTwoEvents(vects);
+    //cout << maxTwoEvents(vectTests);
     cout << endl;
     return 0;
 }
