@@ -1,7 +1,6 @@
 #include <iostream>
 #include <vector>
 #include <chrono>
-#include <unordered_map>
 
 //#include "CaseTests.h"
 
@@ -11,7 +10,7 @@ int maxTwoEvents(vector<vector<int>>& events) {
 
     uint tot = 0;
     uint result = 0;
-    unordered_map<uint, uint> analized;
+    vector<uint> analized;
 
     vector<int>* fEvent = nullptr;
     int* fStart = nullptr;
@@ -31,7 +30,7 @@ int maxTwoEvents(vector<vector<int>>& events) {
         fStart = &fEvent->at(0);
         fEnd = &fEvent->at(1);
 
-        analized[first] = first;
+        analized.push_back(first);
 
         oldValue = nullptr;
         for(uint second=first+1; second < events.size(); second++) {
