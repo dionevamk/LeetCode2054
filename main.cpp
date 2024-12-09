@@ -7,12 +7,13 @@
 using namespace std;
 
 int maxTwoEvents(vector<vector<int>>& events) {
+
     // Ordenar eventos pelo término (`end time`)
     sort(events.begin(), events.end(), [](const vector<int>& a, const vector<int>& b) {
         return a[1] < b[1]; // Ordena por `end time`
     });
 
-    int n = events.size();
+    const int& n = events.size();
     vector<int> maxValue(n, 0);
 
     // Precomputar o maior valor possível até cada evento
@@ -22,25 +23,32 @@ int maxTwoEvents(vector<vector<int>>& events) {
     }
 
     int result = 0;
+    int currentValue;
 
     for (int i = 0; i < n; i++) {
+
         // Pesquisar o evento mais próximo que termina antes do início do evento atual
         int left = 0, right = i - 1, index = -1;
+
         while (left <= right) {
-            int mid = left + (right - left) / 2;
+
+            const int& mid = left + (right - left) / 2;
+
             if (events[mid][1] < events[i][0]) {
                 index = mid;
                 left = mid + 1;
-            } else {
+            }
+            else {
                 right = mid - 1;
             }
         }
 
         // Calcular o valor máximo considerando o evento atual e o melhor evento não conflitante
-        int currentValue = events[i][2];
-        if (index != -1) {
+        currentValue = events[i][2];
+
+        if (index != -1)
             currentValue += maxValue[index];
-        }
+
         result = max(result, currentValue);
     }
 
