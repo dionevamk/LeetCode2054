@@ -7,66 +7,44 @@
 using namespace std;
 
 int maxTwoEvents(vector<vector<int>>& events) {
+    // Ordenar eventos pelo término (`end time`)
+    sort(events.begin(), events.end(), [](const vector<int>& a, const vector<int>& b) {
+        return a[1] < b[1]; // Ordena por `end time`
+    });
 
-    uint tot = 0;
-    uint result = 0;
-    uint indexSecond = 0;
+    int n = events.size();
+    vector<int> maxValue(n, 0);
 
-    vector<int>* fEvent = nullptr;
-    int* fStart = nullptr;
-    int* fEnd = nullptr;
-    //int* fValue = nullptr;
-
-    vector<int>* sEvent = nullptr;
-    int* sStart = nullptr;
-    int* sEnd = nullptr;
-    int* sValue = nullptr;
-
-    int* oldValue = nullptr;
-    uint size = events.size();
-
-    for(uint first=0; first < size; first++) {
-
-        fEvent = &events[first];
-        fStart = &fEvent->at(0);
-        fEnd = &fEvent->at(1);
-
-        indexSecond = first;
-        oldValue = nullptr;
-
-        for(uint second=first+1; second < size; second++) {
-
-            sEvent = &events[second];
-            sStart = &sEvent->at(0);
-            sEnd = &sEvent->at(1);
-            sValue = &sEvent->at(2);
-
-            // Conflito do first com second
-            if((*fStart >= *sStart && *fStart <= *sEnd) || (*fEnd >= *sStart && *fEnd <= *sEnd))
-                continue;
-
-            // Conflito do second com first
-            if((*sStart >= *fStart && *sStart <= *fEnd) || (*sEnd >= *fStart && *sEnd <= *fEnd))
-                continue;
-
-            // Valor novo é menor que o antigo
-            if(oldValue && *sValue < *oldValue)
-                continue;
-
-            oldValue = sValue;
-            indexSecond = second;
-        }
-
-        if(indexSecond != first)
-            result = events[first][2] + events[indexSecond][2];
-        else
-            result = events[first][2];
-
-        if(tot < result)
-            tot = result;
+    // Precomputar o maior valor possível até cada evento
+    maxValue[0] = events[0][2];
+    for (int i = 1; i < n; i++) {
+        maxValue[i] = max(maxValue[i - 1], events[i][2]);
     }
 
-    return tot;
+    int result = 0;
+
+    for (int i = 0; i < n; i++) {
+        // Pesquisar o evento mais próximo que termina antes do início do evento atual
+        int left = 0, right = i - 1, index = -1;
+        while (left <= right) {
+            int mid = left + (right - left) / 2;
+            if (events[mid][1] < events[i][0]) {
+                index = mid;
+                left = mid + 1;
+            } else {
+                right = mid - 1;
+            }
+        }
+
+        // Calcular o valor máximo considerando o evento atual e o melhor evento não conflitante
+        int currentValue = events[i][2];
+        if (index != -1) {
+            currentValue += maxValue[index];
+        }
+        result = max(result, currentValue);
+    }
+
+    return result;
 }
 
 int main()
